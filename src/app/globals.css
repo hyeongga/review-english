@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .btn-style {
+    @apply p-3 rounded-full shadow-md shadow-gray-300;
+  }
+}
