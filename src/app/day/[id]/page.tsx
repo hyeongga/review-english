@@ -14,6 +14,7 @@ export type TReview = {
 
 const Day: NextPage = () => {
   const [review, setReview] = useState<TReview>();
+  const [currentReviewIndex, setCurrentReviewIndex] = useState<number>(0);
   // id는 []속 폴더 명과 동일해야함
   const { id } = useParams();
   useEffect(() => {
@@ -31,7 +32,13 @@ const Day: NextPage = () => {
         </div>
         <div className="font-semibold mb-24 mt-2">Day {id}</div>
       </div>
-      <ReviewCard />
+      {review && (
+        <ReviewCard
+          sentences={review.sentences}
+          currentReviewIndex={currentReviewIndex}
+          setCurrentReviewIndex={setCurrentReviewIndex}
+        />
+      )}
     </main>
   );
 };
