@@ -1,8 +1,9 @@
 import { Dispatch, FC, SetStateAction, useState } from "react";
-import Speaker from "@/app/app/Speaker";
-import LeftArrow from "@/app/app/LeftArrow";
-import RightArrow from "@/app/app/RightArrow";
+import Speaker from "@/app/icons/Speaker";
+import LeftArrow from "@/app/icons/LeftArrow";
+import RightArrow from "@/app/icons/RightArrow";
 import { TReview } from "@/app/day/[id]/page";
+import axios from "axios";
 
 type ReviewCardProps = Pick<TReview, "sentences"> & {
   currentReviewIndex: number;
@@ -16,6 +17,7 @@ const ReviewCard: FC<ReviewCardProps> = ({
   setCurrentReviewIndex,
 }) => {
   const [language, setLanguage] = useState<TLanguage>("korean");
+  const [isLoding, setIsLoading] = useState<boolean>(false);
 
   const onClickLanguage = () => {
     if (language === "korean") {
@@ -33,6 +35,7 @@ const ReviewCard: FC<ReviewCardProps> = ({
     }
     setLanguage("korean");
   };
+
   const onClickNext = () => {
     if (currentReviewIndex >= sentences.length - 1) {
       setCurrentReviewIndex(0);
@@ -42,6 +45,33 @@ const ReviewCard: FC<ReviewCardProps> = ({
     setLanguage("korean");
   };
 
+  const onClickListen = async () => {
+    try {
+      if (isLoding) return;
+      setIsLoading(true);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}/api`, {
+        text: sentences[currentReviewIndex].english,
+      });
+      const binaryData = atob(response.data.audioContent);
+      const byteArray = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        byteArray[i] = binaryData.charCodeAt(i);
+      }
+
+      const blob = new Blob([byteArray.buffer], { type: "audio/mp3" });
+      const newAudio = new Audio(URL.createObjectURL(blob));
+
+      document.body.appendChild(newAudio);
+      newAudio.play();
+
+      setTimeout(() => {
+        setIsLoading(false), 30000;
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className=" w-full">
       <div className="h-60 ">
@@ -49,7 +79,7 @@ const ReviewCard: FC<ReviewCardProps> = ({
           {sentences[currentReviewIndex][language]}
         </div>
         <div className="mt-2">
-          <button className="btn-style">
+          <button className="btn-style" onClick={onClickListen}>
             <Speaker />
           </button>
         </div>
